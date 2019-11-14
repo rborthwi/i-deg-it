@@ -1,0 +1,31 @@
+#The following function takes data in the following format: 79° 31' 13.96" (degrees minutes and seconds) and returns it in decimal degrees
+###Note that importing data from excel into R in this format will result in the following output "79° 31' 13.96\"" 
+    ##This ensures the quotation mark is treated as text. Please note that you just run this for lats and longs and label your output accordingly.
+library(measurement)
+library(gsubfn)
+dms_w_punc<-function(x){
+  lat_dd<-gsub('°','',x)
+  lat_dd<-gsub('\'','',lat_dd)%>%
+  gsub('\\"',"",lat_dd)
+  lat_dd=measurements::conv_unit(lat_dd,from = "deg_min_sec",to="dec_deg")%>%as.numeric(lat_dd)
+  return(lat_dd)
+}
+
+#The following function takes data in the following format: 79311396 (where all punctuation is removed and the data is a character string)
+#Once again, this uses the same premise and outputs decimal degrees.
+
+dms_wo_punc<-function(x){
+lat_dd<-x%>%str_replace_all("(.{2})", "\\1 ")%>%str_trim()
+substr(lat_dd,9,9)<-"." 
+lat_dd <-  as.numeric(conv_unit(lat_dd, from = 'deg_min_sec', to = 'dec_deg'))
+return(lat_dd)
+}
+
+dms_w_hem<-function(x){
+  lat_dd<-gsub('°','',x)
+  lat_dd<-gsub('\'','',lat_dd)%>%
+  gsub('\\"',"",lat_dd)%>%
+  gsubfn(".",list("N"="","S"="","E"="","W"="","n"="","s"="","e"="","w"=""),lat_dd)%>%str_trim()
+  lat_dd=measurements::conv_unit(lat_dd,from = "deg_min_sec",to="dec_deg")%>%as.numeric(lat_dd)
+  return(lat_dd)
+}
